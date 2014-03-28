@@ -1,6 +1,3 @@
-My plugin projects for Typecho in-dev version
-========
-
 目前存放适用于Typecho开发版的插件项目:
 
 ## HighSlide 1.4.5++ for Typecho 0.9 (14.3.14)
@@ -13,5 +10,5 @@ My plugin projects for Typecho in-dev version
 
 **注意**: 正式版Typecho 0.9(13.12.12)用户请不要使用这个插件版本
 
-###blog发布地址
+####发布地址
 http://www.jzwalk.com/archives/net/highslide-for-typecho
