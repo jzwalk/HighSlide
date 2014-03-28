@@ -521,13 +521,13 @@ class HighSlide_Plugin implements Typecho_Plugin_Interface
  				$('#typecho-option-item-trans-8,#typecho-option-item-align-9,#typecho-option-item-opac-10,#typecho-option-item-slide-11,#typecho-option-item-nextimg-12,#typecho-option-item-cpos-13,#typecho-option-item-wrap-14,#typecho-option-item-gallery-15')
  					.removeAttr('style').fadeOut(100).fadeIn(100)
  					.find('input,select').removeAttr('disabled');
-			})
+			});
 			$('input#mode-highslide-packed-js').click(function(){
 				$('.advanced').attr('style','color:#999;font-weight:bold').fadeOut(100).fadeIn(100);
  				$('#typecho-option-item-trans-8,#typecho-option-item-align-9,#typecho-option-item-opac-10,#typecho-option-item-slide-11,#typecho-option-item-nextimg-12,#typecho-option-item-cpos-13,#typecho-option-item-wrap-14,#typecho-option-item-gallery-15')
  					.attr('style','color:#999').fadeOut(100).fadeIn(100)
  					.find('input,select').attr('disabled','disabled');
-			})
+			});
 		}
 	});
 	</script>";
