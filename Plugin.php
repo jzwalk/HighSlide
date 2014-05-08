@@ -3,8 +3,7 @@
  * 无缝集成HighSlide双核版实现自动化弹窗与页面相册功能. 
  * @package HighSlide
  * @author 羽中
- * @version 1.4.6++
- * for Typecho0.9 in-dev version (14.3.14)
+ * @version 1.4.6
  * @link http://www.jzwalk.com/archives/net/highslide-for-typecho
  */
 class HighSlide_Plugin implements Typecho_Plugin_Interface
@@ -448,7 +447,6 @@ $(function() {
 		$gid = new Typecho_Widget_Helper_Form_Element_Hidden('gid');
 		$form1->addInput($gid);
 		$submit = new Typecho_Widget_Helper_Form_Element_Submit();
-    	$submit->input->setAttribute('class','btn');
 		$form1->addItem($submit);
 		//相册设置表单
 		$form2 = new Typecho_Widget_Helper_Form(Typecho_Common::url('/action/gallery-edit?do=sync',$options->index),
@@ -916,13 +914,13 @@ $(function() {
 				for(var i=0;i<val.length;i++) {
 					var thumb = $('<li data-name="thumb_'+val[i].name+'">').attr('style','padding:8px 0px;border-top:1px dashed #D9D9D6;')
 							.data('path',val[i].path).data('thumb',val[i].thumb)
-							.html('<img class="preview" src="'+val[i].thumb+'" alt="thumb_'+val[i].name+'" style="max-width:148px;"/><div class="info">'+val[i].tsize
+							.html('<img class="preview" src="'+val[i].thumb+'" alt="thumb_'+val[i].name+'" style="max-width:153px;"/><div class="info">'+val[i].tsize
 							+' <a class="addto" href="###" title="<?php _e('插入图链'); ?>"><i class="i-exlink"></i></a>'
 							+'<a class="delete" href="###" title="<?php _e('删除缩略图'); ?>"><i class="i-delete"></i></a></div>'),
 						li = $('<li id="list-'+i+'">').attr('style','padding:8px 0px;border-top:1px dashed #D9D9D6;')
 							.data('name',val[i].name).data('title',val[i].title).data('thumb',val[i].thumb).data('path',val[i].path).data('url',val[i].url)
 							.html('<input type="hidden" name="imgname" value="'+val[i].name+'" />'
-							+'<img id="uploadimg-list-'+i+'" class="preview" src="'+val[i].url+'" alt="'+val[i].title+'" style="max-width:248px;"/><div class="info">'+val[i].size
+							+'<img id="uploadimg-list-'+i+'" class="preview" src="'+val[i].url+'" alt="'+val[i].title+'" style="max-width:253px;"/><div class="info">'+val[i].size
 							+' <a class="crop" href="###" title="<?php _e('截取缩略图'); ?>"><i class="mime-application"></i></a></div>'
 							+'<input type="hidden" name="x1" value="" id="x1" />'
 							+'<input type="hidden" name="y1" value="" id="y1" />'
@@ -1530,10 +1528,10 @@ hs.wrapperClassName = "controls-in-heading";';
 		$imgname = preg_split("(\/|\\|:)",$file['name']);
 		$file['name'] = array_pop($imgname);
 		//扩展名
-        $ext = self::getsafename($file['name']);
-        if (!self::checkimgtype($ext)||Typecho_Common::isAppEngine()) {
-            return false;
-        }
+		$ext = strtolower(substr($file['name'],strrpos($file['name'],'.') + 1));
+		if (!self::checkimgtype($ext)) {
+			return false;
+		}
 		//上传路径
 		$settings = Helper::options()->plugin('HighSlide');
 		$imgdir = self::filedata()->dir;
@@ -1612,8 +1610,7 @@ hs.wrapperClassName = "controls-in-heading";';
 				if (file_exists($thumbpath)) {
 					unlink($thumbpath);
 				}
-				return !Typecho_Common::isAppEngine()
-				&& @unlink($imgpath);
+				return @unlink($imgpath);
 			}
 			//七牛删除
 			if ($settings->storage=='qiniu') {
@@ -1674,7 +1671,7 @@ hs.wrapperClassName = "controls-in-heading";';
 		$imgtype = image_type_to_mime_type($imgtype);
 		$adjust = ($imgwidth>442)?$imgwidth/442:1;
 		if ($url) {
-			$adjust = ($imgwidth>248)?$imgwidth/248:1;
+			$adjust = ($imgwidth>253)?$imgwidth/253:1;
 		}
 		$xset *= $adjust;
 		$yset *= $adjust;
@@ -1786,23 +1783,6 @@ hs.wrapperClassName = "controls-in-heading";';
 		@chmod($path,$perms);
 		return true;
 	}
-
-    /**
-     * 获取安全的文件名
-     * 
-     * @access private
-     * @param string $name
-     * @return string
-     */
-    private static function getsafename(&$name)
-    {
-        $name = str_replace(array('"','<','>'),'',$name);
-        $name = str_replace('\\', '/', $name);
-        $name = false === strpos($name,'/')?('a'.$name):str_replace('/','/a',$name);
-        $info = pathinfo($name);
-        $name = substr($info['basename'],1);
-        return isset($info['extension'])?$info['extension']:'';
-    }
 
 	/**
 	 * 图片扩展名检查

@@ -54,9 +54,9 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 	 */
 	public function deletegallery()
 	{
-		$gids = $this->request->filter('int')->getArray('gid');
+		$gids = $this->request->filter('int')->gid;
 		$deletecount = 0;
-		if ($gids) {
+		if ($gids && is_array($gids)) {
 			foreach ($gids as $gid) {
 				if ($this->db->query($this->db->delete($this->prefix.'gallery')->where('gid=?',$gid))) {
 					$deletecount ++;
@@ -77,9 +77,9 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 	 */
 	public function sortgallery()
 	{
-		$galleries = $this->request->filter('int')->getArray('gid');
-		if ($galleries) {
-			foreach ($galleries as $sort=>$gid) {
+		$galleries = $this->request->filter('int')->gid;
+		if ($galleries && is_array($galleries)) {
+			foreach ($galleries as $sort => $gid) {
 				$this->db->query($this->db->update($this->prefix.'gallery')->rows(array('order'=>$sort+1))->where('gid=?',$gid));
 			}
 		}
@@ -102,21 +102,41 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		if (!empty($_FILES)) {
 			$file = array_pop($_FILES);
 			if (0==$file['error']&&is_uploaded_file($file['tmp_name'])) {
-                // xhr的send无法支持utf8
-                if ($this->request->isAjax()) {
-                    $file['name'] = urldecode($file['name']);
-                }
 				$result = HighSlide_Plugin::uploadhandle($file);
 				if (false!==$result) {
-					$this->response->throwJson(array(array(
-						'name'=>$result['name'],
-						'title'=>$result['title'],
-						'bytes'=>number_format(ceil($result['size']/1024)).' Kb'
-						)));
+					//拖拽上传输出json信息
+					if ($this->request->isAjax()) {
+						$this->response->throwJson(array(array(
+							'name'=>$result['name'],
+							'title'=>$result['title'],
+							'bytes'=>number_format(ceil($result['size']/1024)).' Kb'
+							)));
+					//默认上传返回原页并提示成功
+					} else {
+					$this->widget('Widget_Notice')->set(_t('图片 %s 上传成功',$result['title']),NULL,'success');
+					$this->response->goBack();
+					}
 				}
 			}
 		}
-		$this->response->throwJson(false);
+		if ($this->request->isAjax()) {
+			$this->response->throwJson(false);
+		//默认上传返回原页并提示失败
+		} else {
+			$val = function_exists('ini_get')?trim(ini_get('upload_max_filesize')):0;
+			$last = strtolower($val[strlen($val)-1]);
+			switch($last) {
+			case 'g':
+				$val *= 1024;
+			case 'm':
+				$val *= 1024;
+			case 'k':
+				$val *= 1024;
+			}
+			$val = number_format(ceil($val/(1024*1024)));
+			$this->widget('Widget_Notice')->set(_t('上传失败,请确认为图片大小未超过%s并且gallery目录可写入',''.$val.'Mb'),NULL,'error');
+			$this->response->goBack();
+		}
 	}
 
 	/**
@@ -155,6 +175,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		$url = $this->request->from('url');
 		if ($imgname) {
 			$result = HighSlide_Plugin::crophandle($imgname['imgname'],$w['w'],$h['h'],$x1['x1'],$y1['y1'],$path['path'],$url['url']);
+			//输出json信息
 			$this->response->throwJson(array(
 				'bytes'=>number_format(ceil($result/1024)).' Kb'
 				));
@@ -240,6 +261,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 							'tsize'=>number_format(ceil($headers['Content-Length']/1024)).' KB',
 							'tstat'=>$open);
 		}
+		//输出json信息
 		$parse = json_encode($parse);
 		$this->response->throwJson($parse);
 	}
