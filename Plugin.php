@@ -3,7 +3,7 @@
  * 无缝集成HighSlide双核版实现自动化弹窗与页面相册功能. 
  * @package HighSlide
  * @author 羽中
- * @version 1.4.6++
+ * @version 1.4.6-rc
  * for Typecho0.9 in-dev version (14.3.14)
  * @link http://www.jzwalk.com/archives/net/highslide-for-typecho
  */
