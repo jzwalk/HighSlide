@@ -4,6 +4,7 @@
  * @package HighSlide
  * @author 羽中
  * @version 1.4.6
+ * @dependence 13.12.12-*
  * @link http://www.jzwalk.com/archives/net/highslide-for-typecho
  */
 class HighSlide_Plugin implements Typecho_Plugin_Interface
