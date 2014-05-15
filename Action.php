@@ -1,5 +1,6 @@
 <?php
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
+
 class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 {
 	private $db;
@@ -17,13 +18,16 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		if (HighSlide_Plugin::form('insert')->validate()) {
 			$this->response->goBack();
 		}
+
 		$gallery = $this->request->from('thumb','image','description','sort','name');
 		$gallery['order'] = $this->db->fetchObject($this->db->select(array('MAX(order)'=>'maxOrder'))->from($this->prefix.'gallery'))->maxOrder+1;
 		$gallery['gid'] = $this->db->query($this->db->insert($this->prefix.'gallery')->rows($gallery));
+
 		//返回原页并提示信息
 		$this->widget('Widget_Notice')->highlight('gallery-'.$gallery['gid']);
 		$this->widget('Widget_Notice')->set(_t('相册组%s: 图片%s 添加成功',
 			$gallery['sort'],$gallery['name']),NULL,'success');
+
 		$this->response->redirect(Typecho_Common::url('extending.php?panel=HighSlide%2Fmanage-gallery.php&group='.$gallery['sort'],$this->options->adminUrl));
 	}
 
@@ -38,12 +42,15 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		if (HighSlide_Plugin::form('update')->validate()) {
 			$this->response->goBack();
 		}
+
 		$gallery = $this->request->from('gid','thumb','image','description','sort','name');
-		$this->db->query($this->db->update($this->prefix.'gallery')->rows($gallery)->where('gid = ?',$gallery['gid']));
+		$this->db->query($this->db->update($this->prefix.'gallery')->rows($gallery)->where('gid=?',$gallery['gid']));
+
 		//返回原页并提示信息
 		$this->widget('Widget_Notice')->highlight('gallery-'.$gallery['gid']);
 		$this->widget('Widget_Notice')->set(_t('相册组%s: 图片%s 更新成功',
 			$gallery['sort'],$gallery['name']),NULL,'success');
+
 		$this->response->redirect(Typecho_Common::url('extending.php?panel=HighSlide%2Fmanage-gallery.php&group='.$gallery['sort'],$this->options->adminUrl));
 	}
 
@@ -56,6 +63,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 	public function deletegallery()
 	{
 		$gids = $this->request->filter('int')->gid;
+
 		$deletecount = 0;
 		if ($gids && is_array($gids)) {
 			foreach ($gids as $gid) {
@@ -64,9 +72,11 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 				}
 			}
 		}
+
 		//返回原页并提示信息
 		$this->widget('Widget_Notice')->set($deletecount>0?_t('图片已从相册移除'):_t('没有图片被移除'),NULL,
 			$deletecount>0?'success':'notice');
+
 		$this->response->goBack();
 	}
 
@@ -79,11 +89,13 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 	public function sortgallery()
 	{
 		$galleries = $this->request->filter('int')->gid;
+
 		if ($galleries && is_array($galleries)) {
-			foreach ($galleries as $sort => $gid) {
+			foreach ($galleries as $sort=>$gid) {
 				$this->db->query($this->db->update($this->prefix.'gallery')->rows(array('order'=>$sort+1))->where('gid=?',$gid));
 			}
 		}
+
 		//返回原页并提示信息
 		if (!$this->request->isAjax()) {
 			$this->response->goBack();
@@ -104,6 +116,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 			$file = array_pop($_FILES);
 			if (0==$file['error']&&is_uploaded_file($file['tmp_name'])) {
 				$result = HighSlide_Plugin::uploadhandle($file);
+
 				if (false!==$result) {
 					//拖拽上传输出json信息
 					if ($this->request->isAjax()) {
@@ -112,6 +125,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 							'title'=>$result['title'],
 							'bytes'=>number_format(ceil($result['size']/1024)).' Kb'
 							)));
+
 					//默认上传返回原页并提示成功
 					} else {
 					$this->widget('Widget_Notice')->set(_t('图片 %s 上传成功',$result['title']),NULL,'success');
@@ -120,8 +134,10 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 				}
 			}
 		}
+
 		if ($this->request->isAjax()) {
 			$this->response->throwJson(false);
+
 		//默认上传返回原页并提示失败
 		} else {
 			$val = function_exists('ini_get')?trim(ini_get('upload_max_filesize')):0;
@@ -136,6 +152,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 			}
 			$val = number_format(ceil($val/(1024*1024)));
 			$this->widget('Widget_Notice')->set(_t('上传失败,请确认为图片大小未超过%s并且gallery目录可写入',''.$val.'Mb'),NULL,'error');
+
 			$this->response->goBack();
 		}
 	}
@@ -149,12 +166,15 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 	public function removeimage()
 	{
 		$imgname = $this->request->from('imgname');
+
 		//获取附件源参数
 		$path = $this->request->from('path');
 		$url = $this->request->from('url');
+
 		if ($imgname) {
 			HighSlide_Plugin::removehandle($imgname['imgname'],$path['path'],$url['url']);
 		}
+
 		$this->response->throwJson(false);
 	}
 
@@ -171,9 +191,11 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		$h = $this->request->from('h');
 		$x1 = $this->request->from('x1');
 		$y1 = $this->request->from('y1');
+
 		//获取附件源参数
 		$path = $this->request->from('path');
 		$url = $this->request->from('url');
+
 		if ($imgname) {
 			$result = HighSlide_Plugin::crophandle($imgname['imgname'],$w['w'],$h['h'],$x1['x1'],$y1['y1'],$path['path'],$url['url']);
 			//输出json信息
@@ -181,6 +203,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 				'bytes'=>number_format(ceil($result/1024)).' Kb'
 				));
 		}
+
 		$this->response->throwJson(false);
 	}
 
@@ -197,6 +220,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 								$this->request->from('fixedheight'),
 								$this->request->from('fixedratio')
 								);
+
 		$validator = new Typecho_Validate();
 		$validator->addRule('fixedwidth','isInteger',_t('固定宽度请输入整数数字'));
 		$validator->addRule('fixedheight','isInteger',_t('固定高度请输入整数数字'));
@@ -204,10 +228,12 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		$validator->addRule('fixedwidth','required',_t('固定宽度不能为空'));
 		$validator->addRule('fixedheight','required',_t('固定高度不能为空'));
 		$validator->addRule('fixedratio','required',_t('固定比例不能为空'));
+
 		if ($error = $validator->run($requests)) {
 			$this->widget('Widget_Notice')->set($error,'error');
 			$this->response->goBack();
 		}
+
 		//构建同步数组
 		$syncsets = array('qiniubucket','qiniudomain','qiniuaccesskey','qiniusecretkey','qiniuprefix',
 							'upyunbucket','upyundomain','upyunuser','upyunpwd','upyunkey','upyunprefix',
@@ -217,9 +243,11 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 			$result = $this->request->from($syncset);
 			$datas[$syncset] = $result[$syncset];
 		}
+
 		//返回原页并提示信息
 		Widget_Plugins_Edit::configPlugin('HighSlide',$datas);
 		$this->widget('Widget_Notice')->set(_t('相册设置已保存'),NULL,'success');
+
 		$this->response->goBack();
 	}
 
@@ -232,26 +260,32 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 	public function postpreview()
 	{
 		$cid = $this->request->filter('int')->cid;
+
 		//调用对象
 		if ($cid) {
 			Typecho_Widget::widget('Widget_Contents_Attachment_Related','parentId='.$cid)->to($attachment);
 		} else {
 			Typecho_Widget::widget('Widget_Contents_Attachment_Unattached')->to($attachment);
 		}
+
 		//还原为数组
 		while ($attachment->next()) {
 			$datas[] = unserialize($attachment->attachment);
 		}
+
 		foreach ($datas as $data) {
 			if (!$data['isImage']) {
 				return false;
 			}
+	
 			$name = basename($data['path']);
 			$prefix = dirname($data['url']);
 			$thumb = $prefix.'/thumb_'.$name;
+
 			//直接验证缩略图
 			$headers = @get_headers($thumb,true);
 			$open = (@fopen($thumb,'r'))?1:0;
+
 			$parse[] = array('title'=>$data['name'],
 							'name'=>$name,
 							'url'=>$data['url'],
@@ -262,8 +296,10 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 							'tsize'=>number_format(ceil($headers['Content-Length']/1024)).' KB',
 							'tstat'=>$open);
 		}
+
 		//输出json信息
 		$parse = json_encode($parse);
+
 		$this->response->throwJson($parse);
 	}
 
@@ -278,6 +314,7 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		$this->db = Typecho_Db::get();
 		$this->prefix = $this->db->getPrefix();
 		$this->options = Typecho_Widget::widget('Widget_Options');
+
 		$this->on($this->request->is('do=insert'))->insertgallery();
 		$this->on($this->request->is('do=update'))->updategallery();
 		$this->on($this->request->is('do=delete'))->deletegallery();
@@ -287,6 +324,8 @@ class HighSlide_Action extends Typecho_Widget implements Widget_Interface_Do
 		$this->on($this->request->is('do=crop'))->cropthumbnail();
 		$this->on($this->request->is('do=sync'))->syncsettings();
 		$this->on($this->request->is('do=preview'))->postpreview();
+
 		$this->response->redirect($this->options->adminUrl);
 	}
+
 }

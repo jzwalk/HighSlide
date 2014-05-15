@@ -1,6 +1,8 @@
 <?php
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
+
 $fileurl = HighSlide_Plugin::filedata()->url;
+
 //异步加载上传列表
 if(isset($_GET["action"])&&$_GET["action"]=="loadlist") {
 	$lists = HighSlide_Plugin::filelist();
@@ -39,7 +41,9 @@ if(isset($_GET["action"])&&$_GET["action"]=="loadlist") {
 include'common.php';
 include'header.php';
 include'menu.php';
+
 $settings = $options->plugin('HighSlide');
+
 //获取相册数据
 $datas1 = $db->fetchAll($db->select('sort')->from('table.gallery')->order('order',Typecho_Db::SORT_ASC));
 foreach ($datas1 as $data1) {
@@ -51,6 +55,7 @@ if(!empty($sorts)) {
 	$group1 = array_shift($groups);
 	$galleries1 = $db->fetchAll($db->select()->from('table.gallery')->where('sort=?',$group1)->order('order',Typecho_Db::SORT_ASC));
 }
+
 //获取缩略比例
 $ratio = ($settings->thumbfix=='fixedratio')?$settings->fixedratio:'false';
 ?>
@@ -58,7 +63,9 @@ $ratio = ($settings->thumbfix=='fixedratio')?$settings->fixedratio:'false';
 	<div class="body container">
 		<?php include 'page-title.php'; ?>
 		<div class="colgroup typecho-page-main manage-galleries">
+
 			<div class="col-mb-12 typecho-list">
+
 				<div class="clearfix">
 					<ul class="typecho-option-tabs right">
 						<li<?php if(!isset($request->tab)||'images'==$request->get('tab')): ?> class="active w-50"<?php else: ?> class="w-50"<?php endif; ?>><a href="<?php $options->adminUrl('extending.php?panel=HighSlide%2Fmanage-gallery.php'); ?>"><?php _e('图片编辑'); ?></a></li>
@@ -76,6 +83,7 @@ $ratio = ($settings->thumbfix=='fixedratio')?$settings->fixedratio:'false';
 						<li><a href="http://www.jzwalk.com/archives/net/highslide-for-typecho/" title="查看页面相册使用帮助" target="_blank"><?php _e('帮助'); ?></a></li>
 					</ul>
 				</div>
+
 				<div class="col-mb-12 col-tb-7" role="main">
 					<form method="post" name="manage_galleries" class="operate-form">
 					<div class="typecho-list-operate clearfix">
@@ -89,6 +97,7 @@ $ratio = ($settings->thumbfix=='fixedratio')?$settings->fixedratio:'false';
 							</div>
 						</div>
 					</div>
+
 					<div class="typecho-table-wrap">
 						<table class="typecho-list-table">
 							<colgroup>
@@ -135,8 +144,10 @@ $ratio = ($settings->thumbfix=='fixedratio')?$settings->fixedratio:'false';
 							</tbody>
 						</table>
 					</div>
+
 					</form>
 				</div>
+
 				<div class="col-mb-12 col-tb-5" role="complementary">
 				<?php if(!isset($request->tab)||'images'==$request->get('tab')): ?>
 					<link rel="stylesheet" type="text/css" media="all" href="<?php $options->pluginUrl('HighSlide/css/imgareaselect-animated.css'); ?>" />
@@ -156,23 +167,29 @@ $ratio = ($settings->thumbfix=='fixedratio')?$settings->fixedratio:'false';
 							<ul id="file-list"></ul>
 						</div>
 					</div>
+
 					<div id="tab-forms"><?php HighSlide_Plugin::form()->render(); ?></div>
 				<?php else: ?>
 					<div id="tab-settings" class="typecho-content-panel">
 						<?php HighSlide_Plugin::form('sync','2')->render(); ?>
 					</div><!-- end #tab-advance -->
 				<?php endif; ?>
+
 			</div>
+
 		</div>
 	</div>
 </div>
+
 <?php
 include'copyright.php';
 include'common-js.php';
 include'form-js.php';
 ?>
+
 <script src="<?php $options->adminUrl('js/filedrop.js?v='.$suffixVersion); ?>"></script>
 <script src="<?php $options->pluginUrl('HighSlide/js/imgareaselect.js'); ?>"></script>
+
 <script type="text/javascript">
 $(document).ready(function() {
 	var table = $('.typecho-list-table').tableDnD({
@@ -453,7 +470,7 @@ $(document).ready(function() {
 			handles:true,
 			instance:true,
 			classPrefix:'ias-'+id+' ias',
-			aspectRatio:'<?php echo $ratio;?>',
+			aspectRatio:'<?php echo $ratio; ?>',
 			onSelectEnd:function(img,selection) {
 				$('#x1',el).val(selection.x1);
 				$('#y1',el).val(selection.y1);
@@ -510,5 +527,7 @@ $(document).ready(function() {
 
 });
 </script>
+
 <?php include'footer.php';
+
 } ?>
